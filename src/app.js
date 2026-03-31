@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "100% Healthy :)" });
 });
 
 app.use("/products", productsRouter);

@@ -1,18 +1,39 @@
 import Product from "../models/Product.js";
+import Variant from "../models/Variant.js"
 
-export async function getProducts() {
+
+// GET all productts
+export async function getAllProducts() {
   return await Product.find();
 }
 
-export async function createProduct(productData) {
-    try {
-        const product = new Product(productData);
-        await product.save();
-        return product;
-    } catch (error) {
-        console.error("Error creating product:", error);
-        throw error;
-    }
+// GET product by id
+export async function getProductById(id) {
+        return await Product.findById(id);
+   
 }
 
-//TODO: Add more functions as needed
+// GET variant by productId
+export async function getProductVariant(productId) {
+    return await Variant.find({productId});
+
+}
+
+export async function createProduct(productData) {
+    const product = new Product(productData);
+    await product.save();
+    return product;
+
+}
+
+export async function updateProductById(id, productData) {
+    return await Product.findByIdAndUpdate(id, productData, {
+        new: true,
+        runValidators: true
+    });
+}
+
+export async function deleteProductById(id) {
+    return await Product.findByIdAndDelete(id);
+}
+

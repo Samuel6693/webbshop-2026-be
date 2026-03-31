@@ -1,5 +1,4 @@
-import mongoose, { mongo } from "mongoose";
-import Product from "./Product";
+import mongoose from "mongoose";
 
 const variantSchema = new mongoose.Schema({
     productId: {
