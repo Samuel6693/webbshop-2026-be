@@ -2,9 +2,9 @@ import { Router } from "express";
 import bcrypt from "bcrypt"; 
 import { createUser, findUserByEmail } from "../db/users.js";
 
-const router = Router();
+const authRouter = Router();
 
-router.post("/register", async (req, res) => {
+authRouter.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+authRouter.post("/login", async (req, res) => {
   try {
     const { email, password} = req.body;
   
@@ -61,7 +61,7 @@ router.post("/login", async (req, res) => {
         return res.status(401).json({ error: "Invalid email or password" });
       }
   
-    const isMatch = await bcrypt.compare(password. user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" })
     }
@@ -71,7 +71,7 @@ router.post("/login", async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        eamil: user.email
+        email: user.email
       },
     });  
 
@@ -81,4 +81,4 @@ router.post("/login", async (req, res) => {
   
 });
 
-export default router;
+export default authRouter;
