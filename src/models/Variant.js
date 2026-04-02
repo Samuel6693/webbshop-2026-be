@@ -14,7 +14,8 @@ const variantSchema = new mongoose.Schema({
     },
     stock: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     }
 });
 
