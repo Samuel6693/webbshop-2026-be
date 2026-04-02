@@ -22,10 +22,10 @@ const productSchema = new mongoose.Schema({
   dropDate: {
     type: Date,
     required: true,
-  }, 
+  },
   status: {
     type: String,
-    enum: ["Upcoming", "live", "sold_out"]
+    enum: ["upcoming", "live", "sold_out"]
   }
 }, {
   timestamps: true

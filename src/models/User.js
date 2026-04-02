@@ -27,8 +27,26 @@ const userSchema = new mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false
+    }, 
+    address: {
+      street: {
+        type: String,
+        trim: true
+      },
+      postalCode: {
+        type: String,
+        trim: true
+      },
+      city: {
+        type: String,
+        trim: true
+      },
+      country: {
+        type: String,
+        trim: true
+      } 
     }
-  },
+  }, 
   {
     timestamps: true
   }
