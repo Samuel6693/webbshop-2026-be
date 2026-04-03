@@ -107,32 +107,37 @@ status: "live",
 const sizes = [38, 39, 40, 41, 42, 43, 44, 45];
 
 async function seed() {
-await mongoose.connect(process.env.MONGODB_URI);
-
-await Product.deleteMany();
-await Variant.deleteMany();
-
-const createdProducts = await Product.insertMany(productsData);
-
-const variantsData = [];
-
-for (const product of createdProducts) {
-const numberOfVariants = Math.floor(Math.random() * 3) + 4;
-const shuffledSizes = sizes.sort(() => 0.5 - Math.random()).slice(0, numberOfVariants);
-
-for (const size of shuffledSizes) {
-  variantsData.push({
-    productId: product._id,
-    size,
-    stock: Math.floor(Math.random() * 10),
-  });
-}
-
-}
-
-await Variant.insertMany(variantsData);
-
-await mongoose.connection.close();
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        
+        await Product.deleteMany();
+        await Variant.deleteMany();
+        
+        const createdProducts = await Product.insertMany(productsData);
+        
+        const variantsData = [];
+        
+        for (const product of createdProducts) {
+        const numberOfVariants = Math.floor(Math.random() * 3) + 4;
+        const shuffledSizes = sizes.sort(() => 0.5 - Math.random()).slice(0, numberOfVariants);
+        
+        for (const size of shuffledSizes) {
+          variantsData.push({
+            productId: product._id,
+            size,
+            stock: Math.floor(Math.random() * 10),
+          });
+        }
+        
+        }
+        
+        await Variant.insertMany(variantsData);
+        
+    } catch (error) {
+        console.error("Error seeding data:", error);
+    } finally {
+        await mongoose.connection.close();
+    }
 }
 
 seed();
