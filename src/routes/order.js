@@ -8,10 +8,10 @@ const router = Router();
 // Create a new order
 router.post("/", async (req, res) => {
     try {
-        const { product, variant, quantity } = req.body;
+        const { product, variant, quantity, shippingAddress } = req.body;
 
         // Validate required fields
-        if ( !product || !variant || quantity == null) {
+        if ( !product || !variant || quantity == null || !shippingAddress) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
@@ -67,7 +67,8 @@ router.post("/", async (req, res) => {
             product,
             variant,
             quantity,
-            totalPrice
+            totalPrice,
+            shippingAddress,
         });
 
         res.status(201).json(order);
