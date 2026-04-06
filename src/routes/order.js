@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createOrder, getAllOrdersByUserId } from "../db/order.js";
-import Product from "../models/product.js";
-import Variant from "../models/variant.js";
+import Product from "../models/Product.js";
+import Variant from "../models/Variant.js";
 
 const router = Router();
 
