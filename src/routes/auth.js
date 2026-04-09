@@ -2,8 +2,14 @@ import { Router } from "express";
 import bcrypt from "bcrypt"; 
 import { createUser, findUserByEmail } from "../db/users.js";
 import jwt from "jsonwebtoken";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import "dotenv/config";
 
 const authRouter = Router();
+
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+console.log("JWT_REFRESH_SECRET:", process.env.JWT_REFRESH_SECRET);
+
 
 authRouter.post("/register", async (req, res) => {
   try {
@@ -114,5 +120,13 @@ authRouter.post("/login", async (req, res) => {
   }
   
 });
+
+// Protected route to get current user info
+authRouter.get("/me", authMiddleware, async (req, res) => {
+  return res.status(200).json({
+    user: req.user
+  });
+});
+
 
 export default authRouter;

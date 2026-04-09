@@ -2,11 +2,12 @@ import { Router } from "express";
 import { createOrder, getAllOrdersByUserId } from "../db/order.js";
 import Product from "../models/Product.js";
 import Variant from "../models/Variant.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 // Create a new order
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const { product, variant, quantity, shippingAddress } = req.body;
 
@@ -80,7 +81,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get all orders for the authenticated user, requires authentication middleware to set req.user in order to work
-router.get("/me", async (req, res) => {
+router.get("/me", authMiddleware, async (req, res) => {
     try {
         const orders = await getAllOrdersByUserId(req.user._id);
         res.json(orders);
