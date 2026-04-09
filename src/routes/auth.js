@@ -1,15 +1,11 @@
 import { Router } from "express";
 import bcrypt from "bcrypt"; 
-import { createUser, findUserByEmail } from "../db/users.js";
+import { createUser, findUserByEmail, findUserById } from "../db/users.js";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import "dotenv/config";
 
 const authRouter = Router();
-
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
-console.log("JWT_REFRESH_SECRET:", process.env.JWT_REFRESH_SECRET);
-
 
 authRouter.post("/register", async (req, res) => {
   try {
@@ -119,6 +115,36 @@ authRouter.post("/login", async (req, res) => {
     return res.status(500).json({ error: "Login failed" })
   }
   
+});
+
+// Endpoint to refresh access token using a valid refresh token
+authRouter.post("/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: "Refresh token is required" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    const user = await findUserById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    const accessToken = jwt.sign(
+      { userId: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(200).json({
+      accessToken
+    });
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid or expired refresh token" });
+  }
 });
 
 // Protected route to get current user info
