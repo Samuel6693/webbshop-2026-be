@@ -4,26 +4,31 @@ const productSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    required: true,
   },
   price: {
     type: Number,
     required: true,
     min: 0,
   },
-  stock: {
-    type: Number,
-    required: true,
-  },
   image: {
     type: String,
     required: true,
   },
-  slug: {
-    type: String,
+  dropDate: {
+    type: Date,
     required: true,
-    unique: true,
   },
-  //TODO: Add more fields as needed
+  status: {
+    type: String,
+    enum: ["upcoming", "live", "sold_out"]
+  }
+}, {
+  timestamps: true
 });
 
 const Product = mongoose.model("Product", productSchema);
