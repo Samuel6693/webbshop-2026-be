@@ -3,6 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import productsRouter from "./routes/products.js";
 import authRouter from "./routes/auth.js";
+import variantsRouter from "./routes/variants.js";
 import cors from "cors";
 import orderRouter from "./routes/order.js";
 
@@ -40,6 +41,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/products", productsRouter);
+app.use("/variants", variantsRouter);
 app.use("/auth", authRouter);
 app.use("/orders", orderRouter);
 //TODO: Add more routes as needed
