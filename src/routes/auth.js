@@ -128,7 +128,7 @@ authRouter.post("/refresh", async (req, res) => {
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const user = await findUserById(decoded.userId);
+    const user = await getUserById(decoded.userId);
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
