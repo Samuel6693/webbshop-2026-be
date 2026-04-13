@@ -38,7 +38,8 @@ export async function deleteUser(id) {
 export async function getUserWishlist(userId) {
   return await User.findById(userId)
   .populate("wishlist.product")
-  .populate("wishlist.variant");
+  .populate("wishlist.variant")
+  .select("wishlist");
 }
 
 // Add a product (and optional variant) to the user's wishlist
@@ -62,7 +63,8 @@ export async function addToWishlist(userId, productId, variantId = null) {
 
   return await User.findById(userId)
     .populate("wishlist.product")
-    .populate("wishlist.variant");
+    .populate("wishlist.variant")
+    .select("wishlist");
 }
 
 // Remove a product (and optional variant) from the user's wishlist
@@ -82,6 +84,7 @@ export async function removeFromWishlist(userId, productId, variantId = null) {
 
   return await User.findById(userId)
     .populate("wishlist.product")
-    .populate("wishlist.variant");
+    .populate("wishlist.variant")
+    .select("wishlist");
 }
 
