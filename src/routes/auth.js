@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcrypt"; 
-import { createUser, findUserByEmail, findUserById } from "../db/users.js";
+import { createUser, findUserByEmail, findUserById, getUserWishlist, addToWishlist, removeFromWishlist } from "../db/users.js";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import "dotenv/config";

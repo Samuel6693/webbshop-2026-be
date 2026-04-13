@@ -50,7 +50,21 @@ const userSchema = new mongoose.Schema(
         type: String,
         trim: true
       } 
-    }
+    },
+    wishlist: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        variant: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Variant",
+          default: null
+        }
+      },
+    ]
   }, 
   {
     timestamps: true
