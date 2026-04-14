@@ -50,7 +50,21 @@ const userSchema = new mongoose.Schema(
         type: String,
         trim: true
       } 
-    }
+    },
+    wishlist: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        variant: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Variant",
+          default: null
+        }
+      },
+    ]
   }, 
   {
     timestamps: true
@@ -72,6 +86,5 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-const User = mongoose.model("User", userSchema);
 
-export default User;
+export default mongoose.models.User || mongoose.model("User", userSchema);

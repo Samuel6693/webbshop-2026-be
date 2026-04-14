@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcrypt"; 
-import { createUser, findUserByEmail, findUserById } from "../db/users.js";
+import { createUser, findUserByEmail, getUserById } from "../db/users.js";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import "dotenv/config";
@@ -128,7 +128,7 @@ authRouter.post("/refresh", async (req, res) => {
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const user = await findUserById(decoded.userId);
+    const user = await getUserById(decoded.userId);
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
@@ -145,13 +145,6 @@ authRouter.post("/refresh", async (req, res) => {
   } catch (error) {
     return res.status(401).json({ error: "Invalid or expired refresh token" });
   }
-});
-
-// Protected route to get current user info
-authRouter.get("/me", authMiddleware, async (req, res) => {
-  return res.status(200).json({
-    user: req.user
-  });
 });
 
 

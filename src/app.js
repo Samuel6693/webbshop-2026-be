@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import productsRouter from "./routes/products.js";
 import authRouter from "./routes/auth.js";
 import variantsRouter from "./routes/variants.js";
+import userRouter from "./routes/user.js";
 import cors from "cors";
 import orderRouter from "./routes/order.js";
 
@@ -44,6 +45,6 @@ app.use("/products", productsRouter);
 app.use("/variants", variantsRouter);
 app.use("/auth", authRouter);
 app.use("/orders", orderRouter);
-//TODO: Add more routes as needed
+app.use("/users", userRouter);
 
 export default app;
