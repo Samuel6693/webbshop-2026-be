@@ -74,6 +74,7 @@ userRouter.post('/me/wishlist', async (req, res) => {
             wishlist: updatedUser.wishlist
         });
     } catch (error) {
+        console.error("Error adding to wishlist:", error);
         res.status(500).json({ error: "Failed to add to wishlist" });
     }
 });

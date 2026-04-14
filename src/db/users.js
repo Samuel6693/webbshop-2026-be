@@ -51,6 +51,7 @@ export async function addToWishlist(userId, productId, variantId = null) {
 
   if (!user) return null;
 
+
   const alreadyInWishlist = user.wishlist.some((item) => {
       const sameProduct = item.product.toString() === productId;
       const sameVariant = (item.variant?.toString() || null) === (variantId || null);
@@ -59,15 +60,25 @@ export async function addToWishlist(userId, productId, variantId = null) {
   });
 
   if (alreadyInWishlist) {
-    return user; 
+    return await User.findById(userId)
+    .populate("wishlist.product")
+    .populate("wishlist.variant")
+    .select("wishlist") ; 
   }
+
+  user.wishlist.push({
+    product: productId,
+    variant: variantId || null
+  });
 
   await user.save();
 
-  return await User.findById(userId)
+  const updatedUser = await User.findById(userId)
     .populate("wishlist.product")
     .populate("wishlist.variant")
     .select("wishlist");
+
+  return updatedUser;
 }
 
 // Remove a product (and optional variant) from the user's wishlist
