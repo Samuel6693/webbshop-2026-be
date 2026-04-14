@@ -11,6 +11,7 @@ import {
     removeFromWishlist
 } from '../db/users.js';
 import Product from '../models/Product.js';
+import Variant from '../models/Variant.js';
 
 const userRouter = Router();
 

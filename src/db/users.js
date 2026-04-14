@@ -5,7 +5,10 @@ export async function getAllUsers() {
 }
 
 export async function getUserById(id) {
-  return await User.findById(id).select("-password"); // Exclude password field from the result
+  return await User.findById(id)
+  .select("-password") // Exclude password field from the result
+  .populate("wishlist.product")
+  .populate("wishlist.variant");
 }
 
 export async function findUserByEmail(email) {
