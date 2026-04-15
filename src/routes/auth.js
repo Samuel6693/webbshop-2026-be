@@ -34,19 +34,23 @@ authRouter.post("/register", async (req, res) => {
       return res.status(409).json({ error: "Email already registered" });
     }
 
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      return res.status(500).json({ error: "JWT secrets are not configured"});
+    }
+
     const user = await createUser({ name, email, password });
     
-        const accessToken = jwt.sign(
-          { userId: user._id, isAdmin: user.isAdmin },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        );
+      const accessToken = jwt.sign(
+        { userId: user._id, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
     
-        const refreshToken = jwt.sign(
-          { userId: user._id },
-          process.env.JWT_REFRESH_SECRET,
-          { expiresIn: "7d" }
-        );
+      const refreshToken = jwt.sign(
+        { userId: user._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "7d" }
+      );
 
     res.status(201).json({
       message: "User registered successfully",
@@ -88,6 +92,10 @@ authRouter.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" })
     }
 
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      return res.status(500).json({ error: "JWT secrets are not configured" });
+    }
+
     const accessToken = jwt.sign(
       { userId: user._id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
@@ -124,6 +132,10 @@ authRouter.post("/refresh", async (req, res) => {
 
     if (!refreshToken) {
       return res.status(400).json({ error: "Refresh token is required" });
+    }
+
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      return res.status(500).json({ error: "JWT secrets are not configured" });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
