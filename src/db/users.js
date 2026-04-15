@@ -101,4 +101,3 @@ export async function removeFromWishlist(userId, productId, variantId = null) {
     .populate("wishlist.variant")
     .select("wishlist");
 }
-
