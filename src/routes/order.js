@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { createOrder, getAllOrdersByUserId } from "../db/order.js";
+import { createOrder, getAllOrdersByUserId, getAllOrders } from "../db/order.js";
 import Product from "../models/Product.js";
 import Variant from "../models/Variant.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { adminMiddleware } from "../middleware/adminMiddleware.js";
 
 const router = Router();
 
@@ -84,7 +85,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
     try {
         const orders = await getAllOrdersByUserId(req.user._id);
-        res.json(orders);
+        res.status(200).json(orders);
     }
     catch (error) {
         console.error("Error fetching orders:", error);

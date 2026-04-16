@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { adminMiddleware } from "../middleware/adminMiddleware.js";
 import {
   getAllProducts,
   getProductById,
@@ -48,78 +49,9 @@ productsRouter.get("/:id/variants", async (req, res) => {
   }
 });
 
-productsRouter.post("/", async (req, res) => {
-  try {
-    const {name, description, price, image, dropDate, status} = req.body;
 
-    if (!name || !description || !image || !dropDate) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
 
-    if (price == null || price < 0) {
-      return res.status(400).json({ message: "Price must be 0 or higher"});
-    }
 
-    if (status && !["upcoming", "live", "sold_out"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
-
-    const product = await createProduct(req.body);
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Failed to create product",
-      error: error.message});
-  }
-});
-
-productsRouter.put("/:id", async (req, res) => {
-  try {
-    const { name, description, price, image, dropDate, status } = req.body;
-
-    if (!name || !description || !image || !dropDate) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    if (price == null || price < 0) {
-      return res.status(400).json({ message: "Price must be 0 or higher" });
-    }
-
-    if (status && !["upcoming", "live", "sold_out"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
-
-    const updatedProduct = await updateProductById(req.params.id, req.body);
-
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to update product",
-      error: error.message
-    });
-  }
-});
-
-productsRouter.delete("/:id", async (req, res) => {
-  try {
-    const deletedProduct = await deleteProductById(req.params.id);
-
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete product",
-      error: error.message
-    });
-  }
-});
 
 
 

@@ -9,7 +9,7 @@ export async function authMiddleware(req, res, next) {
 
         // The header should be in the format "Bearer <token>"
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ error: "Missing or invalid authorization header" });
+            return res.status(401).json({ error: "Unauthorized" });
         }
 
         // Extract the token from the header

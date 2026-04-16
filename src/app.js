@@ -5,7 +5,11 @@ import authRouter from "./routes/auth.js";
 import variantsRouter from "./routes/variants.js";
 import userRouter from "./routes/user.js";
 import orderRouter from "./routes/order.js";
+import adminRouter from "./routes/admin.js";
 import cors from "cors";
+import { connectToDatabase } from "./config/database.js";
+
+await connectToDatabase();
 
 const app = express();
 
@@ -28,5 +32,6 @@ app.use("/variants", variantsRouter);
 app.use("/auth", authRouter);
 app.use("/orders", orderRouter);
 app.use("/users", userRouter);
+app.use("/admin", adminRouter);
 
 export default app;
