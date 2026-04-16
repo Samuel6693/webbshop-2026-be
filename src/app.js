@@ -6,6 +6,9 @@ import variantsRouter from "./routes/variants.js";
 import userRouter from "./routes/user.js";
 import orderRouter from "./routes/order.js";
 import cors from "cors";
+import { connectToDatabase } from "./config/database.js";
+
+await connectToDatabase();
 
 const app = express();
 
