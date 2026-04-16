@@ -60,7 +60,7 @@ productsRouter.post("/", async (req, res) => {
       return res.status(400).json({ message: "Price must be 0 or higher"});
     }
 
-    if (status && !["Upcoming", "live", "sold_out"].includes(status)) {
+    if (status && !["upcoming", "live", "sold_out"].includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
@@ -85,7 +85,7 @@ productsRouter.put("/:id", async (req, res) => {
       return res.status(400).json({ message: "Price must be 0 or higher" });
     }
 
-    if (status && !["Upcoming", "live", "sold_out"].includes(status)) {
+    if (status && !["upcoming", "live", "sold_out"].includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
