@@ -1,85 +1,137 @@
 import { Router } from "express";
-import { createOrder, getAllOrdersByUserId, getAllOrders } from "../db/order.js";
+import { createOrder, getAllOrdersByUserId } from "../db/order.js";
 import Product from "../models/Product.js";
 import Variant from "../models/Variant.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { adminMiddleware } from "../middleware/adminMiddleware.js";
 
 const router = Router();
 
 // Create a new order
 router.post("/", authMiddleware, async (req, res) => {
     try {
-        const { product, variant, quantity, shippingAddress } = req.body;
+        const { products, address } = req.body;
 
-        // Validate required fields
-        if ( !product || !variant || quantity == null || !shippingAddress) {
-            return res.status(400).json({ error: "Missing required fields" });
+        // Validate the presence of products and address in the request body
+        if (!products || !Array.isArray(products) || products.length === 0) {
+            return res.status(400).json({ error: "Products are required" });
         }
 
-        if (quantity < 1) {
-            return res.status(400).json({ error: "Quantity must be at least one" });
+        if (
+            !address ||
+            !address.name ||
+            !address.street ||
+            !address.city ||
+            !address.postalCode ||
+            !address.country
+        ) {
+            return res.status(400).json({ error: "Complete address is required" });
         }
 
-        // Validate product and variant existence
-        const productExists = await Product.findById(product);
-        if (!productExists) {
-            return res.status(404).json({ error: "Product not found" });
+        
+        const orderProducts = [];
+        let numOfItems = 0;
+        let totalCost = 0;
+
+        const variantsToUpdate = [];
+        const productsToCheckSoldOut = new Map();
+
+        for (const item of products) {
+            const { productId, variantId, quantity } = item;
+
+            if (!productId || !variantId || quantity == null) {
+                return res.status(400).json({
+                    error: "Each product must include productId, variantId, and quantity",
+                });
+            }
+
+            if (quantity < 1) {
+                return res.status(400).json({
+                    error: "Quantity must be at least 1",
+                });
+            }
+
+            const product = await Product.findById(productId);
+            if (!product) {
+                return res.status(404).json({
+                    error: `Product not found` });
+            }
+
+            if (product.status !== "live") {
+                return res.status(400).json({
+                    error: `Product ${product.name} is not available for purchase` });
+            }
+
+            const variant = await Variant.findById(variantId);
+            if (!variant) {
+                return res.status(404).json({
+                    error: `Variant not found` });
+            }
+
+            if (variant.productId.toString() !== product._id.toString()) {
+                return res.status(400).json({
+                    error: `Variant does not belong to the specified product` });
+            }
+
+            if (variant.stock < quantity) {
+                return res.status(400).json({
+                    error: `Insufficient stock for variant ${product.name}`, size: `${variant.size}`
+                });
+            }
+
+            orderProducts.push({
+                productId: product._id,
+                variantId: variant._id,
+                name: product.name,
+                size: variant.size,
+                price: product.price,
+                quantity,
+            });
+
+            numOfItems += quantity;
+            totalCost += product.price * quantity;
+
+            variantsToUpdate.push({ variant, quantity });
+            productsToCheckSoldOut.set(product._id.toString(), product);
         }
 
-        //Check if product is live
-        if (productExists.status !== "live") {
-            return res.status(400).json({ error: "Product is not available for purchase yet" });
+        //Update stock only after all items have passed validation
+        for (const item of variantsToUpdate) {
+            item.variant.stock -= item.quantity;
+            await item.variant.save();
         }
 
-        // Check if variant exists and belongs to the product
-        const variantExists = await Variant.findById(variant);
-        if (!variantExists) {
-            return res.status(404).json({ error: "Variant not found" });
+        //Update product status to sold out if all variants are out of stock
+        for (const product of productsToCheckSoldOut.values()) {
+            const remainingVariants = await Variant.find({productId: product._id});
+            const isSoldOut = remainingVariants.every(variant => variant.stock === 0);
+
+            if (isSoldOut) {
+                product.status = "sold_out";
+                await product.save();
+            }
         }
 
-        // Ensure the variant belongs to the specified product
-        if (variantExists.productId.toString() !== productExists._id.toString()) {
-            return res.status(400).json({ error: "Variant does not belong to the specified product" });
-        }
-
-        // Check stock availability
-        if (variantExists.stock < quantity) {
-            return res.status(400).json({ error: "Insufficient stock for the requested variant" });
-        }
-
-        // Deduct stock and save the variant
-        variantExists.stock -= quantity;
-        await variantExists.save();
-
-        // If all variants are sold out, update product status to "sold_out"
-        const allVariants = await Variant.find({ productId: product });
-        const isSoldOut = allVariants.every((v) => v.stock === 0);
-        if (isSoldOut) {
-            productExists.status = "sold_out";
-            await productExists.save();
-        }
-
-        // Calculate total price in backend to prevent manipulation from client side
-        const totalPrice = productExists.price * quantity;
-
-        // Create the order
         const order = await createOrder({
-            user: req.user._id,
-            product,
-            variant,
-            quantity,
-            totalPrice,
-            shippingAddress,
+            user: {
+                id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                address,
+            },
+            products: orderProducts,
+            numOfItems,
+            totalCost,
+            status: "pending",
         });
 
         res.status(201).json(order);
-
     } catch (error) {
         console.error("Error creating order:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Could not create order" });
     }
 });
+
+
 
 // Get all orders for the authenticated user, requires authentication middleware to set req.user in order to work
 router.get("/me", authMiddleware, async (req, res) => {
@@ -89,7 +141,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     }
     catch (error) {
         console.error("Error fetching orders:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Could not fetch orders" });
     }
 });
 

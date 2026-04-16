@@ -10,15 +10,13 @@ export async function getAllOrders() {
 }
 
 export async function getAllOrdersByUserId(userId) {
-    return await Order.find({ user: userId })
-    .populate("product")
-    .populate("variant")
+    return await Order.find({ "user.id": userId })
     .sort({ createdAt: -1 });
 }
 
-export async function updateOrderStatusById(orderId, status) {
+export async function updateOrderStatusById(id, status) {
     return await Order.findByIdAndUpdate(
-        orderId, 
+        id, 
         { status }, 
         { new: true, runValidators: true }
     );
