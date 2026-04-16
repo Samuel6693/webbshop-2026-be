@@ -2,7 +2,7 @@ import { Router } from "express";
 import { getAllOrders, updateOrderStatusById, updateOrderById, deleteOrderById } from "../db/order.js";
 import { getAllUsers, findSafeUserByEmail, getUserById, updateUser, deleteUser} from "../db/users.js";
 import { createProduct, updateProductById, deleteProductById } from "../db/products.js";
-import { createVariant, updateVariantStock, deleteVariant } from "../db/variant.js";
+import { createVariant, updateVariantStock, deleteVariant } from "../db/variants.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { adminMiddleware } from "../middleware/adminMiddleware.js";
 
