@@ -5,6 +5,7 @@ import { createProduct, updateProductById, deleteProductById } from "../db/produ
 import { createVariant, updateVariantStock, deleteVariant } from "../db/variants.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { adminMiddleware } from "../middleware/adminMiddleware.js";
+import { sendProductEvent } from "./products.js";
 
 const adminRouter = Router();
 
@@ -213,6 +214,12 @@ adminRouter.post("/products", async (req, res) => {
     }
 
     const product = await createProduct(req.body);
+
+    sendProductEvent({
+      type: "product-created",
+      product
+    });
+
     res.status(201).json(product);
   } catch (error) {
     console.error("Error creating product:", error);
@@ -245,6 +252,11 @@ adminRouter.put("/products/:id", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
+     sendProductEvent({
+      type: "product-updated",
+      product: updatedProduct
+    });
+
     res.json(updatedProduct);
   } catch (error) {
     console.error("Error updating product:", error);
@@ -263,6 +275,11 @@ adminRouter.delete("/products/:id", async (req, res) => {
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+      sendProductEvent({
+      type: "product-deleted",
+      productId: req.params.id
+    });
 
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
@@ -321,6 +338,11 @@ adminRouter.put("/variants/:id/stock", async (req, res) => {
     if (!updatedVariant) {
       return res.status(404).json({ error: "Variant not found" });
     }
+
+    sendProductEvent({
+      type: "variant-stock-updated",
+      variant: updatedVariant
+    });
 
     res.json(updatedVariant);
   } catch (error) {
