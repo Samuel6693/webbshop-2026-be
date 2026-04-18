@@ -11,6 +11,8 @@ import {
 
 const productsRouter = Router();
 
+const clients = []; // Array to hold connected clients for SSE
+
 productsRouter.get("/", async (req, res) => {
   try {
     const products = await getAllProducts();
@@ -20,6 +22,24 @@ productsRouter.get("/", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
+
+productsRouter.get("/events", (req, res) => {
+  res.header("Content-Type", "text/event-stream"); // Set the content type for SSE not json or html
+  res.header("Cache-control", "no-cache"); // Disable caching to ensure clients receive real-time updates
+  res.header("Connection", "keep-alive"); // Keep the connection open for continuous updates
+
+  res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`); // \n\n is required to indicate the end of an SSE message 
+
+  clients.push(res); // Add the new client to the list of connected clients
+
+  // Handle client disconnection
+  req.on("close", () => {
+    const index = clients.indexOf(res); // Find the index of the disconnected client
+    if (index !== -1) { //index is -1 if the client is not found in the array, so we check if it's not -1 before trying to remove it
+      clients.splice(index, 1);
+    }
+  })
+})
 
 productsRouter.get("/:id", async (req, res) => {
   try {
@@ -48,11 +68,5 @@ productsRouter.get("/:id/variants", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch variants" });
   }
 });
-
-
-
-
-
-
 
 export default productsRouter;
