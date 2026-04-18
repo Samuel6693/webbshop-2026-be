@@ -13,6 +13,13 @@ const productsRouter = Router();
 
 const clients = []; // Array to hold connected clients for SSE
 
+// function to send events for alla clients 
+function sendProductEvent(payload) {
+  clients.forEach((client) => {
+    client.write(`data: ${JSON.stringify(payload)}\n\n`);
+  });
+}
+
 productsRouter.get("/", async (req, res) => {
   try {
     const products = await getAllProducts();
