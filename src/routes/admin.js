@@ -5,10 +5,35 @@ import { createProduct, updateProductById, deleteProductById } from "../db/produ
 import { createVariant, updateVariantStock, deleteVariant } from "../db/variants.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { adminMiddleware } from "../middleware/adminMiddleware.js";
+import { sendProductEvent } from "./products.js";
+import { publishScheduledProducts } from "../db/products.js";
 
 const adminRouter = Router();
 
 adminRouter.use(authMiddleware, adminMiddleware); // Apply authentication and admin middleware to all routes in this router
+
+adminRouter.post("/products/publish-scheduled", async (req, res) => {
+  try {
+    const publishedProducts = await publishScheduledProducts();
+
+    publishedProducts.forEach((product) => {
+      sendProductEvent({
+        type: "product-status-updated",
+        productId: product._id,
+        status: "live",
+        product
+      });
+    });
+
+    res.json({
+      message: "Scheduled products published",
+      modifiedCount: publishedProducts.length    
+    });
+  } catch (error) {
+    console.error("Error publishing scheduled products:", error);
+    res.status(500).json({ error: "Failed to publish scheduled products" });
+  }
+});
 
 //Get all orders - Admin only
 adminRouter.get("/orders", async (req, res) => {
@@ -213,6 +238,12 @@ adminRouter.post("/products", async (req, res) => {
     }
 
     const product = await createProduct(req.body);
+
+    sendProductEvent({
+      type: "product-created",
+      product
+    });
+
     res.status(201).json(product);
   } catch (error) {
     console.error("Error creating product:", error);
@@ -245,6 +276,11 @@ adminRouter.put("/products/:id", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
+     sendProductEvent({
+      type: "product-updated",
+      product: updatedProduct
+    });
+
     res.json(updatedProduct);
   } catch (error) {
     console.error("Error updating product:", error);
@@ -263,6 +299,11 @@ adminRouter.delete("/products/:id", async (req, res) => {
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+      sendProductEvent({
+      type: "product-deleted",
+      productId: req.params.id
+    });
 
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
@@ -321,6 +362,11 @@ adminRouter.put("/variants/:id/stock", async (req, res) => {
     if (!updatedVariant) {
       return res.status(404).json({ error: "Variant not found" });
     }
+
+    sendProductEvent({
+      type: "variant-stock-updated",
+      variant: updatedVariant
+    });
 
     res.json(updatedVariant);
   } catch (error) {

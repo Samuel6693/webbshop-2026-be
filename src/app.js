@@ -8,6 +8,7 @@ import orderRouter from "./routes/order.js";
 import adminRouter from "./routes/admin.js";
 import cors from "cors";
 import { connectToDatabase } from "./config/database.js";
+import cronRouter from "./routes/cron.js";
 
 await connectToDatabase();
 
@@ -33,5 +34,6 @@ app.use("/auth", authRouter);
 app.use("/orders", orderRouter);
 app.use("/users", userRouter);
 app.use("/admin", adminRouter);
+app.use("/cron", cronRouter);
 
 export default app;
