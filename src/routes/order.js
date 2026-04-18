@@ -3,6 +3,7 @@ import { createOrder, getAllOrdersByUserId } from "../db/order.js";
 import Product from "../models/Product.js";
 import Variant from "../models/Variant.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { sendProductEvent } from "./products.js";
 
 const router = Router();
 
@@ -98,6 +99,11 @@ router.post("/", authMiddleware, async (req, res) => {
         for (const item of variantsToUpdate) {
             item.variant.stock -= item.quantity;
             await item.variant.save();
+
+            sendProductEvent({
+                type: "variant-stock-updated",
+                variant: item.variant,
+            });
         }
 
         //Update product status to sold out if all variants are out of stock
@@ -108,6 +114,11 @@ router.post("/", authMiddleware, async (req, res) => {
             if (isSoldOut) {
                 product.status = "sold_out";
                 await product.save();
+
+                sendProductEvent({
+                    type: "product-sold-out",
+                    productId: product._id,
+                });
             }
         }
 

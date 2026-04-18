@@ -6,10 +6,34 @@ import { createVariant, updateVariantStock, deleteVariant } from "../db/variants
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { adminMiddleware } from "../middleware/adminMiddleware.js";
 import { sendProductEvent } from "./products.js";
+import { publishScheduledProducts } from "../db/products.js";
 
 const adminRouter = Router();
 
 adminRouter.use(authMiddleware, adminMiddleware); // Apply authentication and admin middleware to all routes in this router
+
+adminRouter.post("/products/publish-scheduled", async (req, res) => {
+  try {
+    const publishedProducts = await publishScheduledProducts();
+
+    publishedProducts.forEach((product) => {
+      sendProductEvent({
+        type: "product-status-updated",
+        productId: product._id,
+        status: "live",
+        product
+      });
+    });
+
+    res.json({
+      message: "Scheduled products published",
+      modifiedCount: publishedProducts.length    
+    });
+  } catch (error) {
+    console.error("Error publishing scheduled products:", error);
+    res.status(500).json({ error: "Failed to publish scheduled products" });
+  }
+});
 
 //Get all orders - Admin only
 adminRouter.get("/orders", async (req, res) => {
