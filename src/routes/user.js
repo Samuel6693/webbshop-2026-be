@@ -27,16 +27,28 @@ userRouter.get('/me', async (req, res) => {
     }
 });
 
-// Update own user by ID
+// Update own user
 userRouter.put('/me', async (req, res) => {
     try {
-        const { name, email } = req.body;
+        const { name, email, address } = req.body;
 
-        if (!name || !email) {
-            return res.status(400).json({ error: "Name and email are required" });
+        const updateData = {};
+
+        if (name) updateData.name = name;
+        if (email) updateData.email = email;
+
+        if (address) {
+            if (address.street) updateData["address.street"] = address.street;
+            if (address.city) updateData["address.city"] = address.city;
+            if (address.postalCode) updateData["address.postalCode"] = address.postalCode;
+            if (address.country) updateData["address.country"] = address.country;
         }
 
-        const user = await updateUser(req.user._id, { name, email });
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: "No valid fields to update" });
+        }
+
+        const user = await updateUser(req.user._id, updateData);
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -45,6 +57,10 @@ userRouter.put('/me', async (req, res) => {
         res.json({ message: "User updated successfully", user });
     } catch (error) {
         console.error("Error updating user:", error);
+        
+        if (error.code === 11000) {
+            return res.status(400).json({ error: "Email already in use" });
+        }
         res.status(500).json({ error: "Failed to update user" });
     }
 });
