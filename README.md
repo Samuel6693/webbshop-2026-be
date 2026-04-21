@@ -1,6 +1,6 @@
 # Webbshop 2026 - Backend (MEN Stack)
 
-**MEN Stack:** MongoDB · Express · Node.js
+**MEN Stack:** MongoDB, Express, Node.js
 
 ## Setup
 
@@ -8,39 +8,40 @@
    ```bash
    npm install
    ```
-   *Note: `mongodb-memory-server` is used for testing. It is very heavy and therefore will take a lot of time to install.*
+   `mongodb-memory-server` anvands for tester och kan ta en stund att installera.
 
 2. **Configure environment**
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` if needed (e.g. MongoDB connection string).
+   Uppdatera `.env` med till exempel MongoDB-anslutning och JWT-hemligheter.
 
-   *Note: MongoDB is required to be installed and running locally or on Atlas.*
-
-3. **Start MongoDB** (must be running locally or use Atlas)
+3. **Start MongoDB**
    ```bash
-   # If using local MongoDB
    mongod --dbpath <path to data directory>
    ```
+   Alternativt anvander ni MongoDB Atlas.
 
 4. **Run the server**
    ```bash
-   npm run dev    # Development with auto-reload
-   npm start      # Production
+   npm run dev
+   npm start
    ```
 
 ## API
 
-- `GET /` — API info
-- `GET /health` — Health check
+- `GET /` - API info
+- `GET /health` - Health check
+
+## Postman mot Vercel
+
+Det finns en fardig Postman-setup i [postman/README.md](/C:/Users/Samuel/Desktop/WEBB25/Backend 1/webbshop-2026-be/postman/README.md:1) for att testa den deployade Vercel-miljon i stallet for lokal server.
 
 ## Project structure
 
-```
+```text
 src/
-├── config/
-│   └── database.js   # MongoDB connection
-├── server.js         # Express app entry
-└── (add: routes/, models/, controllers/)
+|-- config/
+|   |-- database.js
+|-- server.js
 ```
