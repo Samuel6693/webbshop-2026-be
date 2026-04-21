@@ -27,6 +27,28 @@ userRouter.get('/me', async (req, res) => {
     }
 });
 
+// Update own user by ID
+userRouter.put('/me', async (req, res) => {
+    try {
+        const { name, email } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({ error: "Name and email are required" });
+        }
+
+        const user = await updateUser(req.user._id, { name, email });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ message: "User updated successfully", user });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Failed to update user" });
+    }
+});
+
 // Get current authenticated user's wishlist
 userRouter.get('/me/wishlist', async (req, res) => {
     try {
@@ -123,11 +145,6 @@ userRouter.get('/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch user" });
     }
 });
-
-// Update user by ID (for admin use only or the user themselves)
-
-
-// Delete user by ID (for admin use only)
 
 
 export default userRouter;
