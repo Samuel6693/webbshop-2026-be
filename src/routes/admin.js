@@ -55,7 +55,7 @@ adminRouter.put("/orders/:id/status", async (req, res) => {
             return res.status(400).json({ error: "Status is required" });
         }
 
-        if (!["pending", "confirmed", "shipped"].includes(status)) {
+        if (!["pending", "confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
             return res.status(400).json({ error: "Invalid status value" });
         }
 
